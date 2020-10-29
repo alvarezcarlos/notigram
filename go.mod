@@ -1,4 +1,4 @@
-module notigram
+module github.com/alvarezcarlos/notigram
 
 go 1.15
 
