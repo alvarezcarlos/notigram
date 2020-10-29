@@ -1,18 +1,11 @@
 package notigram
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	tb "gopkg.in/tucnak/telebot.v2"
-	notificationRepository "notigram/infrastructure/notification"
-	"notigram/usecase/notification"
 	"time"
 )
-
-func Notify(bot *tb.Bot, info *MessageInfo) {
-	notificationRepo := notificationRepository.NewNotificationRepository(bot)
-	notificationUseCase := notification.NewNotificationUseCase(notificationRepo)
-	notificationUseCase.Notify(info)
-}
 
 func NewTelegramBot(url, token string) *tb.Bot {
 	b, err := tb.NewBot(tb.Settings{
@@ -26,4 +19,19 @@ func NewTelegramBot(url, token string) *tb.Bot {
 		log.Fatal(err)
 	}
 	return b
+}
+
+func Notify(bot *tb.Bot, info *MessageInfo) error {
+	chat, err := bot.ChatByID(info.ChatId)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+	message := fmt.Sprintf("%s says: \n %s", info.AppName, info.Message)
+	_, err = bot.Send(chat, message)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+	return nil
 }
